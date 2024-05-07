@@ -1,0 +1,96 @@
+import tkinter as tk
+from tkinter import messagebox
+from datetime import datetime
+
+class Note:
+    def __init__(self, text):
+        self.text = text
+        self.created_at = datetime.now()
+
+class Reminder(Note):
+    def __init__(self, text, remind_at):
+        super().__init__(text)
+        self.remind_at = remind_at
+
+class NoteApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Заметки и напоминания")
+
+        self.notes = []
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.label = tk.Label(self.master, text="Заметки и напоминания", font=("Helvetica", 16))
+        self.label.pack(pady=10)
+
+        self.note_entry = tk.Entry(self.master, width=50)
+        self.note_entry.pack(pady=5)
+
+        self.add_note_button = tk.Button(self.master, text="Добавить заметку", command=self.add_note)
+        self.add_note_button.pack(pady=5)
+
+        self.reminder_entry = tk.Entry(self.master, width=50)
+        self.reminder_entry.pack(pady=5)
+
+        self.reminder_time_entry = tk.Entry(self.master, width=50)
+        self.reminder_time_entry.insert(0, "YYYY-MM-DD HH:MM")
+        self.reminder_time_entry.pack(pady=5)
+
+        self.add_reminder_button = tk.Button(self.master, text="Добавить напоминание", command=self.add_reminder)
+        self.add_reminder_button.pack(pady=5)
+
+        self.display_notes_button = tk.Button(self.master, text="Показать заметки", command=self.display_notes)
+        self.display_notes_button.pack(pady=5)
+
+        self.display_reminders_button = tk.Button(self.master, text="Показать напоминания", command=self.display_reminders)
+        self.display_reminders_button.pack(pady=5)
+
+    def add_note(self):
+        note_text = self.note_entry.get()
+        if note_text:
+            note = Note(note_text)
+            self.notes.append(note)
+            messagebox.showinfo("Успешно", "Заметка добавлена успешно.")
+            self.note_entry.delete(0, tk.END)
+        else:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите текст заметки.")
+
+    def add_reminder(self):
+        reminder_text = self.reminder_entry.get()
+        remind_at_str = self.reminder_time_entry.get()
+        if reminder_text and remind_at_str:
+            try:
+                remind_at = datetime.strptime(remind_at_str, "%Y-%m-%d %H:%M")
+                reminder = Reminder(reminder_text, remind_at)
+                self.notes.append(reminder)
+                messagebox.showinfo("Успешно", "Напоминание добавлено успешно.")
+                self.reminder_entry.delete(0, tk.END)
+                self.reminder_time_entry.delete(0, tk.END)
+            except ValueError:
+                messagebox.showerror("Ошибка", "Неправильный формат времени. Используйте YYYY-MM-DD HH:MM.")
+        else:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите текст напоминания и время.")
+
+    def display_notes(self):
+        notes_text = "\n".join([note.text for note in self.notes if isinstance(note, Note)])
+        if notes_text:
+            messagebox.showinfo("Заметки", notes_text)
+        else:
+            messagebox.showinfo("Заметки", "Нет заметок.")
+
+    def display_reminders(self):
+        reminders_text = "\n".join([f"{reminder.text} (Remind at: {reminder.remind_at})" for reminder in self.notes if isinstance(reminder, Reminder)])
+        if reminders_text:
+            messagebox.showinfo("Напоминания", reminders_text)
+        else:
+            messagebox.showinfo("Напоминания", "Нет напоминаний.")
+
+def main():
+    root = tk.Tk()
+    app = NoteApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
